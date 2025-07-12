@@ -1,0 +1,16 @@
+SELECT * FROM 
+`jlr-dl-cat.veh001_vehicle_data_product_branches.TMP_reconciliation_for_finance_DEC_NETHERLANDS` 
+
+-- change this table name based on market and month
+
+WHERE 
+1=1
+AND
+(
+  WHOLESALE_DATE BETWEEN "2024-12-01" AND "2024-12-31"
+--change this date based on the month
+  OR
+  REVERSE_WHOLESALE_DATE BETWEEN "2024-12-01" AND "2024-12-31"
+--change this date based on the month
+)
+AND vin_from_epm is not null and VIN is not null;

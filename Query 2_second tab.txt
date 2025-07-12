@@ -1,0 +1,3 @@
+SELECT * FROM `jlr-dl-cat.veh001_vehicle_data_product_source.wholesale_consolidated_data`
+WHERE UPPER(_Regional_Mkt_)="NETHERLANDS"  --change this based on market
+AND UPPER(Wholesale_Month)="DECEMBER-2024"; --chnage this based on recon period

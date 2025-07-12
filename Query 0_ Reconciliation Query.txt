@@ -1,0 +1,39 @@
+create or replace table
+`jlr-dl-cat.veh001_vehicle_data_product_branches.TMP_reconciliation_for_finance_DEC_NETHERLANDS`
+--change this table name based on month and market
+as
+SELECT DISTINCT
+      r.VIN as vin_from_EPM ,
+      r.INVOICE_OR_CREDIT rec_qty,
+      r._Regional_Mkt_,
+      x.*  
+     
+FROM
+`jlr-dl-cat.JLR_DL_EDW_RDY_DP0012_branches.FACT_WHOLESALE_STATUS` x
+ 
+-- this join is only for the reconciliation against the finance document ---------    
+      FULL OUTER JOIN ( SELECT DISTINCT
+                              VIN,
+                              INVOICE_OR_CREDIT,
+                              _Regional_Mkt_,
+                              Wholesale_Month,
+                              SUBSTR(Wholesale_Month, 0,3) rec_mth,
+                              SUBSTR(Wholesale_Month, LENGTH(Wholesale_Month)-3 ,4) as rec_year
+                        FROM  `jlr-dl-cat.veh001_vehicle_data_product_source.wholesale_consolidated_data`  ) r
+                        ON   r.VIN = x.VIN
+                              and UPPER(TRIM(x.MARKET))=UPPER(TRIM(r._Regional_Mkt_))
+                              and (SUBSTR(Wholesale_Month, 0,3)  = FORMAT_DATE('%b', x.Wholesale_date )
+                                    OR
+                                    SUBSTR(Wholesale_Month, 0,3) = FORMAT_DATE('%b', x.Reverse_wholesale_date ) )
+                              and ( SUBSTR(Wholesale_Month, LENGTH(Wholesale_Month)-3 ,4) = FORMAT_DATE('%Y', x.Wholesale_date)
+                                    OR
+                                    SUBSTR(Wholesale_Month, LENGTH(Wholesale_Month)-3 ,4) = FORMAT_DATE('%Y', x.Reverse_wholesale_date) )
+                              and r.INVOICE_OR_CREDIT = x.WHOLESALE_QTY
+                              and UPPER(r._Regional_Mkt_) IN ("NETHERLANDS")  --change this based on Market
+                              and UPPER(r.rec_mth) = "DEC"   --change this based on first three letters from the month
+                              and r.rec_year="2024"          --change this based on Year
+                       
+ 
+WHERE
+   UPPER(x.MARKET) IN ("NETHERLANDS") -- change this based on Market
+ORDER BY MARKET, VIN,BILL_DATE DESC;
